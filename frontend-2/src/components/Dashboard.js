@@ -9,7 +9,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Divider
+  Divider,
+  Paper
 } from '@mui/material';
 import { 
   ResponsiveContainer, 
@@ -17,308 +18,359 @@ import {
   Bar, 
   XAxis, 
   YAxis, 
-  Tooltip, 
-  PieChart, 
-  Pie, 
-  Cell,
-  LineChart,
-  Line,
-  CartesianGrid,
-  Legend
+  Tooltip 
 } from 'recharts';
-import {
-  People as PeopleIcon,
-  ShoppingCart as PedidosIcon,
-  Inventory as ProductosIcon,
-  TrendingUp as TrendingIcon,
-  Star as StarIcon
-} from '@mui/icons-material';
-
-// Colores para los gráficos
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function Dashboard({ clientes = [], pedidos = [], productos = [] }) {
-  // Métricas básicas
+  // Métricas principales
   const totalClientes = clientes.length;
   const totalPedidos = pedidos.length;
   const totalProductos = productos.length;
 
-  // Pedidos por cliente
+  // Cálculos
   const pedidosPorCliente = clientes.map(c => ({
     nombre: c.nombre,
     pedidos: pedidos.filter(p => p.cliente_id === c.id).length
-  })).filter(item => item.pedidos > 0);
+  })).filter(item => item.pedidos > 0)
+    .sort((a, b) => b.pedidos - a.pedidos);
 
-  // Productos más pedidos
-  const productosMasPedidos = productos.map(p => ({
+  const clientesConPedidos = pedidosPorCliente.length;
+  const promedioPedidosPorCliente = totalClientes > 0 ? (totalPedidos / totalClientes).toFixed(1) : '0.0';
+  const porcentajeClientesActivos = totalClientes > 0 ? ((clientesConPedidos / totalClientes) * 100).toFixed(0) : '0';
+
+  // Productos más vendidos
+  const productosTop = productos.map(p => ({
     nombre: p.nombre,
-    cantidad: pedidos.filter(ped => ped.producto_id === p.id)
+    ventas: pedidos.filter(ped => ped.producto_id === p.id).length,
+    cantidadTotal: pedidos.filter(ped => ped.producto_id === p.id)
       .reduce((sum, ped) => sum + (parseInt(ped.cantidad) || 0), 0)
   }))
-  .filter(item => item.cantidad > 0)
-  .sort((a, b) => b.cantidad - a.cantidad)
+  .filter(p => p.ventas > 0)
+  .sort((a, b) => b.ventas - a.ventas)
   .slice(0, 5);
 
-  // Clientes más activos
-  const clientesTop = [...pedidosPorCliente]
-    .sort((a, b) => b.pedidos - a.pedidos)
-    .slice(0, 5);
-
-  // Tendencias mensuales (simulado)
-  const tendenciaMensual = [
-    { mes: 'Ene', pedidos: Math.floor(Math.random() * 20) + 10 },
-    { mes: 'Feb', pedidos: Math.floor(Math.random() * 20) + 15 },
-    { mes: 'Mar', pedidos: Math.floor(Math.random() * 20) + 12 },
-    { mes: 'Abr', pedidos: Math.floor(Math.random() * 20) + 18 },
-    { mes: 'May', pedidos: Math.floor(Math.random() * 20) + 14 },
-    { mes: 'Jun', pedidos: pedidos.length || Math.floor(Math.random() * 20) + 16 }
-  ];
-
-  // Métricas adicionales
-  const promedioPedidosPorCliente = totalClientes > 0 ? (totalPedidos / totalClientes).toFixed(1) : 0;
-  const clientesConPedidos = pedidosPorCliente.length;
-  const porcentajeClientesActivos = totalClientes > 0 ? ((clientesConPedidos / totalClientes) * 100).toFixed(1) : 0;
-
-  // Card con icono reutilizable
-  const MetricCard = ({ title, value, icon, color = "#1976d2", subtitle }) => (
-    <Card sx={{ height: '100%', background: `linear-gradient(135deg, ${color}20, ${color}10)` }}>
-      <CardContent>
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <Typography variant="h6" color="text.secondary">
-            {title}
-          </Typography>
-          <Box sx={{ color: color }}>
-            {icon}
-          </Box>
-        </Box>
-        <Typography variant="h4" component="div" sx={{ color: color, fontWeight: 'bold' }}>
-          {value}
-        </Typography>
-        {subtitle && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {subtitle}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
-  );
+  const sistemaActivo = totalPedidos > 0;
 
   return (
-    <Box>
-      {/* Métricas principales */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+    <Box sx={{ p: 1 }}>
+      {/* HEADER PRINCIPAL */}
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Typography variant="h4" fontWeight="bold" gutterBottom color="primary">
+          PANEL DE CONTROL
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          Resumen general del sistema
+        </Typography>
+      </Box>
+
+      {/* MÉTRICAS PRINCIPALES */}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Total Clientes"
-            value={totalClientes}
-            icon={<PeopleIcon fontSize="large" />}
-            color="#1976d2"
-          />
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+            color: 'white',
+            height: 120
+          }}>
+            <CardContent sx={{ textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Typography variant="h2" fontWeight="bold">
+                {totalClientes}
+              </Typography>
+              <Typography variant="h6">
+                CLIENTES
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Total Pedidos"
-            value={totalPedidos}
-            icon={<PedidosIcon fontSize="large" />}
-            color="#2e7d32"
-          />
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%)',
+            color: 'white',
+            height: 120
+          }}>
+            <CardContent sx={{ textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Typography variant="h2" fontWeight="bold">
+                {totalPedidos}
+              </Typography>
+              <Typography variant="h6">
+                PEDIDOS
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Total Productos"
-            value={totalProductos}
-            icon={<ProductosIcon fontSize="large" />}
-            color="#ed6c02"
-          />
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #ed6c02 0%, #e65100 100%)',
+            color: 'white',
+            height: 120
+          }}>
+            <CardContent sx={{ textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Typography variant="h2" fontWeight="bold">
+                {totalProductos}
+              </Typography>
+              <Typography variant="h6">
+                PRODUCTOS
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
+
         <Grid item xs={12} sm={6} md={3}>
-          <MetricCard
-            title="Pedidos/Cliente"
-            value={promedioPedidosPorCliente}
-            icon={<TrendingIcon fontSize="large" />}
-            color="#9c27b0"
-            subtitle={`${porcentajeClientesActivos}% clientes activos`}
-          />
+          <Card sx={{ 
+            background: 'linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)',
+            color: 'white',
+            height: 120
+          }}>
+            <CardContent sx={{ textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <Typography variant="h2" fontWeight="bold">
+                {promedioPedidosPorCliente}
+              </Typography>
+              <Typography variant="h6">
+                PROMEDIO
+              </Typography>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
 
-      {/* Gráficos y estadísticas */}
+      {/* CONTENIDO PRINCIPAL */}
       <Grid container spacing={3}>
-        {/* Gráfico de pedidos por cliente */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Pedidos por Cliente
+        {/* COLUMNA IZQUIERDA - GRÁFICO */}
+        <Grid item xs={12} lg={8}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h5" fontWeight="bold">
+                DISTRIBUCIÓN DE PEDIDOS
               </Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={pedidosPorCliente}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="nombre" angle={-45} textAnchor="end" height={80} />
+              <Chip 
+                label={`${porcentajeClientesActivos}% CLIENTES ACTIVOS`} 
+                color="primary" 
+                variant="filled"
+              />
+            </Box>
+            
+            {pedidosPorCliente.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={pedidosPorCliente.slice(0, 8)}>
+                  <XAxis 
+                    dataKey="nombre" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={80}
+                    fontSize={12}
+                  />
                   <YAxis allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="pedidos" fill="#1976d2" radius={[4, 4, 0, 0]} />
+                  <Bar 
+                    dataKey="pedidos" 
+                    fill="#1976d2" 
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={50}
+                  />
                 </BarChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  📊 Sin datos de pedidos
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  No hay pedidos registrados para mostrar el gráfico
+                </Typography>
+              </Box>
+            )}
+          </Paper>
         </Grid>
 
-        {/* Productos más populares */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Productos Más Pedidos
+        {/* COLUMNA DERECHA - ESTADÍSTICAS */}
+        <Grid item xs={12} lg={4}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              ESTADO DEL SISTEMA
+            </Typography>
+            
+            {/* Indicador de estado */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              mb: 3, 
+              p: 2, 
+              borderRadius: 2,
+              bgcolor: sistemaActivo ? 'success.main' : 'grey.500',
+              color: 'white'
+            }}>
+              <Box sx={{ 
+                width: 12, 
+                height: 12, 
+                borderRadius: '50%', 
+                bgcolor: sistemaActivo ? '#4caf50' : '#9e9e9e',
+                mr: 2,
+                animation: sistemaActivo ? 'pulse 1.5s infinite' : 'none'
+              }} />
+              <Typography variant="h6" fontWeight="bold">
+                {sistemaActivo ? 'SISTEMA ACTIVO' : 'SISTEMA INACTIVO'}
               </Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={productosMasPedidos}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ nombre, cantidad }) => `${nombre}: ${cantidad}`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="cantidad"
-                  >
-                    {productosMasPedidos.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
+            </Box>
 
-        {/* Tendencias mensuales */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Tendencia de Pedidos
-              </Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={tendenciaMensual}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="pedidos" 
-                    stroke="#ff7300" 
-                    strokeWidth={2}
-                    dot={{ fill: '#ff7300', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
+            {/* Métricas rápidas */}
+            <Box sx={{ mb: 3 }}>
+              <Grid container spacing={1}>
+                <Grid item xs={6}>
+                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'grey.100', borderRadius: 2 }}>
+                    <Typography variant="h4" fontWeight="bold" color="primary">
+                      {clientesConPedidos}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Clientes Activos
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'grey.100', borderRadius: 2 }}>
+                    <Typography variant="h4" fontWeight="bold" color="primary">
+                      {productosTop.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Productos Vendidos
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
 
-        {/* Top clientes */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Clientes Más Activos
-                <Chip 
-                  label="Top 5" 
-                  size="small" 
-                  color="primary" 
-                  sx={{ ml: 1 }}
-                />
+            {/* Resumen */}
+            <Box sx={{ bgcolor: 'primary.50', p: 2, borderRadius: 2 }}>
+              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+                RESUMEN EJECUTIVO
               </Typography>
+              <Box sx={{ lineHeight: 2 }}>
+                <Typography variant="body2">
+                  • {clientesConPedidos} de {totalClientes} clientes activos
+                </Typography>
+                <Typography variant="body2">
+                  • {productosTop.length} de {totalProductos} productos con ventas
+                </Typography>
+                <Typography variant="body2">
+                  • Tasa de actividad: {porcentajeClientesActivos}%
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* SECCIÓN INFERIOR - PRODUCTOS Y CLIENTES */}
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+        {/* PRODUCTOS POPULARES */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              🏆 PRODUCTOS DESTACADOS
+            </Typography>
+            
+            {productosTop.length > 0 ? (
               <List>
-                {clientesTop.map((cliente, index) => (
-                  <React.Fragment key={cliente.nombre}>
+                {productosTop.map((producto, index) => (
+                  <React.Fragment key={producto.nombre}>
                     <ListItem>
-                      <Box sx={{ mr: 2 }}>
-                        <StarIcon sx={{ 
-                          color: index === 0 ? '#FFD700' : 
+                      <Box sx={{ 
+                        width: 28, 
+                        height: 28, 
+                        borderRadius: '50%', 
+                        bgcolor: index === 0 ? '#FFD700' : 
                                  index === 1 ? '#C0C0C0' : 
-                                 index === 2 ? '#CD7F32' : 'action.disabled' 
-                        }} />
+                                 index === 2 ? '#CD7F32' : 'primary.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        fontSize: '12px',
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }}>
+                        {index + 1}
                       </Box>
                       <ListItemText 
-                        primary={cliente.nombre} 
-                        secondary={`${cliente.pedidos} pedidos`}
+                        primary={producto.nombre}
+                        secondary={`${producto.ventas} ventas • ${producto.cantidadTotal} unidades`}
                       />
                       <Chip 
                         label={`#${index + 1}`} 
-                        size="small" 
+                        size="small"
+                        color={index < 3 ? "primary" : "default"}
+                      />
+                    </ListItem>
+                    {index < productosTop.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  📦 Sin productos vendidos
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  No hay ventas registradas aún
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+        </Grid>
+
+        {/* CLIENTES DESTACADOS */}
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              ⭐ CLIENTES DESTACADOS
+            </Typography>
+            
+            {pedidosPorCliente.length > 0 ? (
+              <List>
+                {pedidosPorCliente.slice(0, 5).map((cliente, index) => (
+                  <React.Fragment key={cliente.nombre}>
+                    <ListItem>
+                      <Box sx={{ 
+                        width: 28, 
+                        height: 28, 
+                        borderRadius: '50%', 
+                        bgcolor: 'primary.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        fontSize: '12px',
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }}>
+                        {index + 1}
+                      </Box>
+                      <ListItemText 
+                        primary={cliente.nombre}
+                        secondary={`${cliente.pedidos} pedido${cliente.pedidos !== 1 ? 's' : ''}`}
+                      />
+                      <Chip 
+                        label={`${cliente.pedidos} pedidos`} 
+                        size="small"
+                        color="primary"
                         variant="outlined"
                       />
                     </ListItem>
-                    {index < clientesTop.length - 1 && <Divider />}
+                    {index < Math.min(4, pedidosPorCliente.length - 1) && <Divider />}
                   </React.Fragment>
                 ))}
-                {clientesTop.length === 0 && (
-                  <ListItem>
-                    <ListItemText 
-                      primary="No hay datos disponibles" 
-                      secondary="No se han registrado pedidos aún"
-                    />
-                  </ListItem>
-                )}
               </List>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* Estado general */}
-      <Grid container spacing={3} sx={{ mt: 1 }}>
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Resumen General
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    Clientes con pedidos:
-                  </Typography>
-                  <Typography variant="h6">
-                    {clientesConPedidos} / {totalClientes}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    Tasa de actividad:
-                  </Typography>
-                  <Typography variant="h6">
-                    {porcentajeClientesActivos}%
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    Productos activos:
-                  </Typography>
-                  <Typography variant="h6">
-                    {productosMasPedidos.length} / {totalProductos}
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                  <Typography variant="body2" color="text.secondary">
-                    Estado del sistema:
-                  </Typography>
-                  <Chip 
-                    label={totalPedidos > 0 ? "Activo" : "Inactivo"} 
-                    color={totalPedidos > 0 ? "success" : "default"}
-                    size="small"
-                  />
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  👥 Sin clientes activos
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  No hay pedidos registrados
+                </Typography>
+              </Box>
+            )}
+          </Paper>
         </Grid>
       </Grid>
     </Box>

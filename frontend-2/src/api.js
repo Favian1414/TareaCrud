@@ -124,3 +124,37 @@ export const eliminarProducto = async (id, callback) => {
     callback(err);
   }
 };
+// AUTENTICACIÓN
+export const loginUser = async (credentials) => {
+  try {
+    const response = await axios.post('http://localhost:5000/auth/login', credentials);
+    return response.data;
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Error de conexión' 
+    };
+  }
+};
+
+export const registerUser = async (userData) => {
+  try {
+    const response = await axios.post('http://localhost:5000/auth/register', userData);
+    return response.data;
+  } catch (error) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Error de conexión' 
+    };
+  }
+};
+
+export const verifyAuth = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/auth/verify');
+    return response.data;
+  } catch (error) {
+    return { success: false, message: 'Sesión expirada' };
+  }
+};
+
