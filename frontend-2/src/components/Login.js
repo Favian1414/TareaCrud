@@ -15,7 +15,8 @@ import {
   Person as PersonIcon,
   Lock as LockIcon,
   Dashboard as DashboardIcon,
-  HowToReg as HowToRegIcon
+  HowToReg as HowToRegIcon,
+  EmojiPeople as WelcomeIcon
 } from '@mui/icons-material';
 import { loginUser } from '../api';
 
@@ -57,6 +58,20 @@ export default function Login({ onLogin, onSwitchToRegister }) {
     setError('');
   };
 
+  // Colores del tema amigable
+  const themeColors = {
+    primary: '#D4AF37', // Dorado principal
+    primaryLight: '#E8C55A', // Dorado claro
+    primaryDark: '#B8941F', // Dorado oscuro
+    background: '#121212', // Fondo negro
+    surface: '#1E1E1E', // Superficie
+    surfaceLight: '#2A2A2A', // Superficie clara
+    textPrimary: '#FFFFFF', // Texto principal
+    textSecondary: '#B0B0B0', // Texto secundario
+    border: '#333333', // Bordes
+    success: '#4CAF50', // Verde para éxito
+  };
+
   return (
     <Container 
       component="main" 
@@ -65,7 +80,9 @@ export default function Login({ onLogin, onSwitchToRegister }) {
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        
+        py: 4
       }}
     >
       <Box
@@ -76,7 +93,7 @@ export default function Login({ onLogin, onSwitchToRegister }) {
           alignItems: 'center',
         }}
       >
-        {/* Logo/Título */}
+        {/* Header Acogedor */}
         <Box 
           sx={{ 
             textAlign: 'center', 
@@ -86,64 +103,126 @@ export default function Login({ onLogin, onSwitchToRegister }) {
             alignItems: 'center'
           }}
         >
-          <DashboardIcon 
-            sx={{ 
-              fontSize: 60, 
-              mb: 2,
-              backgroundColor: 'primary.main',
-              padding: 1,
-              borderRadius: 2,
-              boxShadow: 3
-            }} 
-          />
+          <Box
+            sx={{
+              position: 'relative',
+              mb: 3,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2
+            }}
+          >
+            <Box
+              sx={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <DashboardIcon 
+                sx={{ 
+                  fontSize: 50,
+                  color: themeColors.primary,
+                }} 
+              />
+              <WelcomeIcon 
+                sx={{ 
+                  fontSize: 24,
+                  color: themeColors.primaryLight,
+                  position: 'absolute',
+                  bottom: -5,
+                  right: -5,
+                  backgroundColor: themeColors.surface,
+                  borderRadius: '50%',
+                  padding: 0.5
+                }} 
+              />
+            </Box>
+            <Typography 
+              component="h1" 
+              variant="h4" 
+              sx={{
+                fontWeight: 'bold',
+                color: themeColors.primary,
+                textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+              }}
+            >
+              ¡Bienvenido!
+            </Typography>
+          </Box>
+          
           <Typography 
-            component="h1" 
-            variant="h3" 
+            variant="h5" 
             gutterBottom
             sx={{
               fontWeight: 'bold',
-              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
+              color: themeColors.textPrimary,
+              mb: 1
             }}
           >
             Sistema de Gestión
           </Typography>
           <Typography 
-            variant="h6" 
-            color="text.secondary"
-            sx={{ mb: 1 }}
+            variant="body1" 
+            sx={{ 
+              color: themeColors.textSecondary,
+              maxWidth: 400,
+              lineHeight: 1.6
+            }}
           >
-            Iniciar Sesión
-          </Typography>
-          <Typography 
-            variant="body2" 
-            color="text.secondary"
-          >
-            Ingresa tus credenciales para acceder al sistema
+            Ingresa a tu cuenta para gestionar clientes, productos y pedidos de manera sencilla
           </Typography>
         </Box>
 
-        {/* Card del formulario */}
+        {/* Card del formulario - Más amigable */}
         <Paper 
-          elevation={8}
+          elevation={0}
           sx={{
             width: '100%',
             padding: 4,
-            background: 'linear-gradient(145deg, #1e1e1e 0%, #2d2d2d 100%)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: 3,
-            backdropFilter: 'blur(10px)'
+            background: themeColors.surface,
+            border: `2px solid ${themeColors.border}`,
+            borderRadius: 4,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+            '&:hover': {
+              borderColor: themeColors.primary,
+              transition: 'border-color 0.3s ease'
+            }
           }}
         >
+          {/* Mensaje de bienvenida */}
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: themeColors.primary,
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1
+              }}
+            >
+              <PersonIcon /> Inicia Sesión
+            </Typography>
+            <Typography variant="body2" sx={{ color: themeColors.textSecondary, mt: 1 }}>
+              Tu portal de gestión empresarial
+            </Typography>
+          </Box>
+
           {error && (
             <Alert 
               severity="error" 
               sx={{ 
                 mb: 3,
                 borderRadius: 2,
-                alignItems: 'center'
+                backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                color: themeColors.textPrimary,
+                border: `1px solid #f44336`,
+                '& .MuiAlert-icon': {
+                  color: '#f44336'
+                }
               }}
             >
               {error}
@@ -156,33 +235,44 @@ export default function Login({ onLogin, onSwitchToRegister }) {
               required
               fullWidth
               id="username"
-              label="Usuario"
+              label="Nombre de usuario"
               name="username"
               autoComplete="username"
               autoFocus
               value={credentials.username}
               onChange={handleChange}
               disabled={loading}
+              placeholder="Ingresa tu usuario"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PersonIcon color="primary" />
+                    <PersonIcon sx={{ color: themeColors.primary }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
-                mb: 2,
+                mb: 3,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
+                  borderRadius: 3,
+                  color: themeColors.textPrimary,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  '& fieldset': {
+                    borderColor: themeColors.border,
+                    borderWidth: 2,
+                  },
                   '&:hover fieldset': {
-                    borderColor: 'primary.main',
+                    borderColor: themeColors.primaryLight,
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: 'primary.main',
+                    borderColor: themeColors.primary,
+                    borderWidth: 2,
                   },
                 },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'primary.main',
+                '& .MuiInputLabel-root': {
+                  color: themeColors.textSecondary,
+                  '&.Mui-focused': {
+                    color: themeColors.primary,
+                  },
                 }
               }}
             />
@@ -199,26 +289,37 @@ export default function Login({ onLogin, onSwitchToRegister }) {
               value={credentials.password}
               onChange={handleChange}
               disabled={loading}
+              placeholder="Ingresa tu contraseña"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LockIcon color="primary" />
+                    <LockIcon sx={{ color: themeColors.primary }} />
                   </InputAdornment>
                 ),
               }}
               sx={{
-                mb: 3,
+                mb: 4,
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
+                  borderRadius: 3,
+                  color: themeColors.textPrimary,
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  '& fieldset': {
+                    borderColor: themeColors.border,
+                    borderWidth: 2,
+                  },
                   '&:hover fieldset': {
-                    borderColor: 'primary.main',
+                    borderColor: themeColors.primaryLight,
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: 'primary.main',
+                    borderColor: themeColors.primary,
+                    borderWidth: 2,
                   },
                 },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: 'primary.main',
+                '& .MuiInputLabel-root': {
+                  color: themeColors.textSecondary,
+                  '&.Mui-focused': {
+                    color: themeColors.primary,
+                  },
                 }
               }}
             />
@@ -229,61 +330,140 @@ export default function Login({ onLogin, onSwitchToRegister }) {
               variant="contained"
               disabled={loading}
               sx={{
-                mt: 1,
-                mb: 3,
                 py: 1.5,
-                borderRadius: 2,
+                borderRadius: 3,
                 fontSize: '1.1rem',
                 fontWeight: 'bold',
                 textTransform: 'none',
-                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+                background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.primaryLight} 100%)`,
+                color: themeColors.background,
+                boxShadow: `0 4px 15px ${themeColors.primary}40`,
                 '&:hover': {
-                  background: 'linear-gradient(45deg, #1976D2 30%, #1E88E5 90%)',
-                  boxShadow: '0 4px 8px 2px rgba(33, 203, 243, .4)',
+                  background: `linear-gradient(135deg, ${themeColors.primaryLight} 0%, ${themeColors.primary} 100%)`,
+                  boxShadow: `0 6px 20px ${themeColors.primary}60`,
+                  transform: 'translateY(-2px)',
+                },
+                '&:active': {
+                  transform: 'translateY(0)',
                 },
                 '&:disabled': {
-                  background: 'grey.600',
-                }
+                  background: themeColors.border,
+                  color: themeColors.textSecondary,
+                  boxShadow: 'none',
+                  transform: 'none',
+                },
               }}
             >
               {loading ? (
-                <CircularProgress size={24} color="inherit" />
+                <CircularProgress size={24} sx={{ color: themeColors.background }} />
               ) : (
-                'Ingresar al Sistema'
+                <>
+                  <LockIcon sx={{ mr: 1, fontSize: 20 }} />
+                  Ingresar a Mi Cuenta
+                </>
               )}
             </Button>
 
-            
+            {/* Separador amigable */}
+            <Box sx={{ display: 'flex', alignItems: 'center', my: 4 }}>
+              <Divider sx={{ flex: 1, borderColor: themeColors.border }} />
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: themeColors.textSecondary, 
+                  px: 2,
+                  fontStyle: 'italic'
+                }}
+              >
+                ¿Primera vez aquí?
+              </Typography>
+              <Divider sx={{ flex: 1, borderColor: themeColors.border }} />
+            </Box>
 
-            {/* Botón para cambiar a registro */}
+            {/* Botón para registro */}
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                ¿No tienes una cuenta?
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: themeColors.textSecondary, 
+                  mb: 2,
+                  fontWeight: '500'
+                }}
+              >
+                ¿Aún no tienes cuenta?
               </Typography>
               <Button
                 variant="outlined"
                 startIcon={<HowToRegIcon />}
                 onClick={onSwitchToRegister}
                 sx={{
-                  borderRadius: 2,
-                  textTransform: 'none'
+                  borderRadius: 3,
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  borderColor: themeColors.primary,
+                  color: themeColors.primary,
+                  px: 4,
+                  py: 1,
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderColor: themeColors.primaryLight,
+                    color: themeColors.primaryLight,
+                    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 4px 12px ${themeColors.primary}30`,
+                    borderWidth: 2,
+                  }
                 }}
               >
-                Crear Cuenta
+                Crear Mi Cuenta
               </Button>
             </Box>
           </Box>
         </Paper>
 
-        {/* Footer */}
+        {/* Footer amigable */}
         <Box sx={{ mt: 4, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            Sistema de Gestión de Clientes y Pedidos v1.0
+          <Typography variant="body2" sx={{ color: themeColors.textSecondary, mb: 1 }}>
+            💼 Sistema de Gestión Empresarial v2.0
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Desarrollado con React & Node.js
+          <Typography variant="caption" sx={{ color: themeColors.textSecondary, opacity: 0.7 }}>
+            Diseñado para hacer tu trabajo más fácil y eficiente
           </Typography>
+        </Box>
+
+        {/* Características destacadas */}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 3, 
+            mt: 4,
+            flexWrap: 'wrap'
+          }}
+        >
+          {[
+            { icon: '👥', text: 'Gestiona Clientes' },
+            { icon: '📦', text: 'Controla Productos' },
+            { icon: '📋', text: 'Organiza Pedidos' }
+          ].map((item, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                maxWidth: 100
+              }}
+            >
+              <Typography variant="h4" sx={{ mb: 1 }}>
+                {item.icon}
+              </Typography>
+              <Typography variant="caption" sx={{ color: themeColors.textSecondary }}>
+                {item.text}
+              </Typography>
+            </Box>
+          ))}
         </Box>
       </Box>
     </Container>
