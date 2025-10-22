@@ -2,62 +2,66 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:5000';
 
-// CLIENTES
+// CLIENTES - CORREGIDAS
 export const fetchClientes = async (setClientes) => {
   try {
     const res = await axios.get(`${BASE_URL}/clientes`);
-    setClientes(res.data || []); // ← Siempre pasar array
+    setClientes(res.data || []);
   } catch (err) { 
     console.error('Error fetching clientes:', err);
-    setClientes([]); // ← IMPORTANTE: setear array vacío en error
+    setClientes([]);
   }
 };
 
 export const agregarCliente = async (data, callback) => {
   try { 
-    await axios.post(`${BASE_URL}/clientes`, data); 
-    callback(); 
+    const res = await axios.post(`${BASE_URL}/clientes`, data); 
+    callback(null, res.data); // ← Pasar el cliente creado con ID real
   } catch (err) { 
     console.error('Error agregando cliente:', err); 
-    callback(err); // ← Pasar el error al callback
+    callback(err, null);
   }
 };
 
 export const editarCliente = async (id, data, callback) => {
   try { 
     await axios.put(`${BASE_URL}/clientes/${id}`, data); 
-    callback(); 
+    callback(null, { id, ...data }); // ← Pasar datos actualizados
   } catch (err) { 
     console.error('Error editando cliente:', err);
-    callback(err);
+    callback(err, null);
   }
 };
 
 export const eliminarCliente = async (id, callback) => {
   try { 
     await axios.delete(`${BASE_URL}/clientes/${id}`); 
-    callback(); 
+    callback(null);
   } catch (err) { 
     console.error('Error eliminando cliente:', err);
     callback(err);
   }
 };
 
-// PEDIDOS
+
+// PEDIDOS - CORREGIDAS (usa BASE_URL como las demás)
 export const fetchPedidos = async (setPedidos) => {
-  try { 
-    const res = await axios.get(`${BASE_URL}/pedidos`); 
-    setPedidos(res.data || []); // ← Siempre pasar array
+  try {
+    const res = await axios.get(`${BASE_URL}/pedidos`); // ← CORREGIDO
+    console.log('📦 Pedidos recibidos:', res.data);
+    setPedidos(res.data || []);
   } catch (err) { 
     console.error('Error fetching pedidos:', err);
-    setPedidos([]); // ← IMPORTANTE: setear array vacío en error
+    setPedidos([]);
   }
 };
 
 export const agregarPedido = async (data, callback) => {
-  try { 
-    await axios.post(`${BASE_URL}/pedidos`, data); 
-    callback(); 
+  try {
+    console.log('🔄 Enviando pedido:', data);
+    const res = await axios.post(`${BASE_URL}/pedidos`, data); // ← CORREGIDO
+    console.log('✅ Pedido creado:', res.data);
+    callback(res.data);
   } catch (err) { 
     console.error('Error agregando pedido:', err);
     callback(err);
@@ -65,9 +69,9 @@ export const agregarPedido = async (data, callback) => {
 };
 
 export const editarPedido = async (id, data, callback) => {
-  try { 
-    await axios.put(`${BASE_URL}/pedidos/${id}`, data); 
-    callback(); 
+  try {
+    await axios.put(`${BASE_URL}/pedidos/${id}`, data); // ← CORREGIDO
+    callback();
   } catch (err) { 
     console.error('Error editando pedido:', err);
     callback(err);
@@ -75,59 +79,60 @@ export const editarPedido = async (id, data, callback) => {
 };
 
 export const eliminarPedido = async (id, callback) => {
-  try { 
-    await axios.delete(`${BASE_URL}/pedidos/${id}`); 
-    callback(); 
+  try {
+    await axios.delete(`${BASE_URL}/pedidos/${id}`); // ← CORREGIDO
+    callback();
   } catch (err) { 
     console.error('Error eliminando pedido:', err);
     callback(err);
   }
 };
 
-// PRODUCTOS
+// PRODUCTOS - CORREGIDAS
 export const fetchProductos = async (setProductos) => {
-  try { 
-    const res = await axios.get(`${BASE_URL}/productos`); 
-    setProductos(res.data || []); // ← Siempre pasar array
+  try {
+    const res = await axios.get(`${BASE_URL}/productos`);
+    setProductos(res.data || []);
   } catch (err) { 
     console.error('Error fetching productos:', err);
-    setProductos([]); // ← IMPORTANTE: setear array vacío en error
+    setProductos([]);
   }
 };
 
 export const agregarProducto = async (data, callback) => {
-  try { 
-    await axios.post(`${BASE_URL}/productos`, data); 
-    callback(); 
+  try {
+    const res = await axios.post(`${BASE_URL}/productos`, data);
+    callback(null, res.data); // ← Pasar el producto creado con ID real
   } catch (err) { 
     console.error('Error agregando producto:', err);
-    callback(err);
+    callback(err, null);
   }
 };
 
 export const editarProducto = async (id, data, callback) => {
-  try { 
-    await axios.put(`${BASE_URL}/productos/${id}`, data); 
-    callback(); 
+  try {
+    await axios.put(`${BASE_URL}/productos/${id}`, data);
+    callback(null, { id, ...data }); // ← Pasar datos actualizados
   } catch (err) { 
     console.error('Error editando producto:', err);
-    callback(err);
+    callback(err, null);
   }
 };
 
 export const eliminarProducto = async (id, callback) => {
-  try { 
-    await axios.delete(`${BASE_URL}/productos/${id}`); 
-    callback(); 
+  try {
+    await axios.delete(`${BASE_URL}/productos/${id}`);
+    callback(null);
   } catch (err) { 
     console.error('Error eliminando producto:', err);
     callback(err);
   }
 };
+
 // AUTENTICACIÓN
 export const loginUser = async (credentials) => {
   try {
-    const response = await axios.post('http://localhost:5000/auth/login', credentials);
+    const response = await axios.post(`${BASE_URL}/auth/login`, credentials);
     return response.data;
   } catch (error) {
     return { 
@@ -139,7 +144,7 @@ export const loginUser = async (credentials) => {
 
 export const registerUser = async (userData) => {
   try {
-    const response = await axios.post('http://localhost:5000/auth/register', userData);
+    const response = await axios.post(`${BASE_URL}/auth/register`, userData);
     return response.data;
   } catch (error) {
     return { 
@@ -151,10 +156,9 @@ export const registerUser = async (userData) => {
 
 export const verifyAuth = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/auth/verify');
+    const response = await axios.get(`${BASE_URL}/auth/verify`);
     return response.data;
   } catch (error) {
     return { success: false, message: 'Sesión expirada' };
   }
 };
-
